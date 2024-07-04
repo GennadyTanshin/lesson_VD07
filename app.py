@@ -15,9 +15,10 @@ login_manager.login_view = 'login'
 users = {}
 
 class User(UserMixin):
-    def __init__(self, id, username, password):
+    def __init__(self, id, username, email, password):
         self.id = id
         self.username = username
+        self.email = email
         self.password = password
 
 @login_manager.user_loader
@@ -47,9 +48,10 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         username = form.username.data
+        email = form.email.data
         password = form.password.data
         user_id = str(len(users) + 1)
-        users[user_id] = User(user_id, username, password)
+        users[user_id] = User(user_id, username, email, password)
         flash('Registration successful! You can now log in.')
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
@@ -60,11 +62,13 @@ def edit_profile():
     form = EditProfileForm()
     if form.validate_on_submit():
         current_user.username = form.username.data
+        current_user.email = form.email.data
         if form.password.data:
             current_user.password = form.password.data
         flash('Profile updated successfully.')
         return redirect(url_for('home'))
     form.username.data = current_user.username  # Pre-fill the form with current username
+    form.email.data = current_user.email  # Pre-fill the form with current email
     return render_template('edit_profile.html', form=form)
 
 @app.route('/logout')
